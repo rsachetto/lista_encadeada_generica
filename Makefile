@@ -1,2 +1,5 @@
 all:
-	gcc -g3 -fsanitize=address *.c -o teste
+	gcc -g3 *.c -o main
+
+clean:
+	rm *.o main
