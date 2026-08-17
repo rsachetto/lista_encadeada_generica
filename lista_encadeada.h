@@ -1,52 +1,58 @@
 #ifndef __LISTA_ENCADEADA_H
 #define __LISTA_ENCADEADA_H
 
-#define is_char_literal(c) (#c[0] == '\'')
+#include <string.h>
+
+#define is_char_literal(c) (strchr(#c, '\'') != NULL && strchr(#c, '"') == NULL)
 
 #define inserir_no_fim(l, X)                                                   \
-  is_char_literal(X) ? inserir_no_fim_char(l,X) : \
-_Generic((X),\
-int: inserir_no_fim_int,\
-int*: inserir_no_fim_pint,\
-float: inserir_no_fim_float,\
-float*: inserir_no_fim_pfloat,\
-double: inserir_no_fim_double,\
-double*: inserir_no_fim_pdouble,\
-char: inserir_no_fim_char,\
-char*: inserir_no_fim_pchar,\
-long: inserir_no_fim_long,\
-long*: inserir_no_fim_plong,\
-short: inserir_no_fim_short,\
-short*: inserir_no_fim_pshort,\
-void*: inserir_no_fim_pvoid,\
-default: nao_suportado\
-)(l, X)
+  _Generic((X),                                                                \
+    int: (is_char_literal(X) ? inserir_no_fim_char_int : inserir_no_fim_int),  \
+    int*: inserir_no_fim_pint,                                                 \
+    float: inserir_no_fim_float,                                               \
+    float*: inserir_no_fim_pfloat,                                             \
+    double: inserir_no_fim_double,                                             \
+    double*: inserir_no_fim_pdouble,                                           \
+    char: inserir_no_fim_char,                                                 \
+    char*: inserir_no_fim_pchar,                                               \
+    const char*: inserir_no_fim_pchar,                                         \
+    long: inserir_no_fim_long,                                                 \
+    long*: inserir_no_fim_plong,                                               \
+    short: inserir_no_fim_short,                                               \
+    short*: inserir_no_fim_pshort,                                             \
+    void*: inserir_no_fim_pvoid,                                               \
+    const void*: inserir_no_fim_pvoid,                                         \
+    default: nao_suportado                                                     \
+  )(l, X)
 
 #define inserir_no_inicio(l, X)                                                \
-  is_char_literal(X) ? inserir_no_inicio_char(l,X) : \
-_Generic((X),\
-int: inserir_no_inicio_int,\
-int*: inserir_no_inicio_pint,\
-float: inserir_no_inicio_float,\
-float*: inserir_no_inicio_pfloat,\
-double: inserir_no_inicio_double,\
-double*: inserir_no_inicio_pdouble,\
-char: inserir_no_inicio_char,\
-char*: inserir_no_inicio_pchar,\
-long: inserir_no_inicio_long,\
-long*: inserir_no_inicio_plong,\
-short: inserir_no_inicio_short,\
-short*: inserir_no_inicio_pshort,\
-void*: inserir_no_inicio_pvoid,\
-default: nao_suportado\
-)(l, X)
+  _Generic((X),                                                                \
+    int: (is_char_literal(X) ? inserir_no_inicio_char_int : inserir_no_inicio_int), \
+    int*: inserir_no_inicio_pint,                                              \
+    float: inserir_no_inicio_float,                                            \
+    float*: inserir_no_inicio_pfloat,                                          \
+    double: inserir_no_inicio_double,                                          \
+    double*: inserir_no_inicio_pdouble,                                        \
+    char: inserir_no_inicio_char,                                              \
+    char*: inserir_no_inicio_pchar,                                            \
+    const char*: inserir_no_inicio_pchar,                                      \
+    long: inserir_no_inicio_long,                                              \
+    long*: inserir_no_inicio_plong,                                            \
+    short: inserir_no_inicio_short,                                            \
+    short*: inserir_no_inicio_pshort,                                          \
+    void*: inserir_no_inicio_pvoid,                                            \
+    const void*: inserir_no_inicio_pvoid,                                      \
+    default: nao_suportado                                                     \
+  )(l, X)
 
 #define MAP(l, fn)                                                             \
   do {                                                                         \
-    celula *c = l->primeiro;                                                   \
+    if (!(l)) break;                                                           \
+    celula *c = (l)->primeiro;                                                 \
     while (c) {                                                                \
+      celula *prox = c->proximo;                                               \
       fn(c);                                                                   \
-      c = c->proximo;                                                          \
+      c = prox;                                                                \
     }                                                                          \
   } while (0)
 
@@ -99,6 +105,9 @@ typedef struct lista_encadeada_t {
 } lista_encadeada;
 
 lista_encadeada *nova_lista();
+void limpar_lista(lista_encadeada *l);
+void destruir_lista(lista_encadeada *l);
+
 void inserir_no_fim_int(lista_encadeada *l, int x);
 void inserir_no_fim_pint(lista_encadeada *l, int *x);
 void inserir_no_fim_float(lista_encadeada *l, float x);
@@ -106,12 +115,13 @@ void inserir_no_fim_pfloat(lista_encadeada *l, float *x);
 void inserir_no_fim_double(lista_encadeada *l, double x);
 void inserir_no_fim_pdouble(lista_encadeada *l, double *x);
 void inserir_no_fim_char(lista_encadeada *l, char x);
-void inserir_no_fim_pchar(lista_encadeada *l, char *x);
+void inserir_no_fim_char_int(lista_encadeada *l, int x);
+void inserir_no_fim_pchar(lista_encadeada *l, const char *x);
 void inserir_no_fim_long(lista_encadeada *l, long x);
 void inserir_no_fim_plong(lista_encadeada *l, long *x);
 void inserir_no_fim_short(lista_encadeada *l, short x);
 void inserir_no_fim_pshort(lista_encadeada *l, short *x);
-void inserir_no_fim_pvoid(lista_encadeada *l, void *x);
+void inserir_no_fim_pvoid(lista_encadeada *l, const void *x);
 
 void inserir_no_inicio_int(lista_encadeada *l, int x);
 void inserir_no_inicio_pint(lista_encadeada *l, int *x);
@@ -120,15 +130,18 @@ void inserir_no_inicio_pfloat(lista_encadeada *l, float *x);
 void inserir_no_inicio_double(lista_encadeada *l, double x);
 void inserir_no_inicio_pdouble(lista_encadeada *l, double *x);
 void inserir_no_inicio_char(lista_encadeada *l, char x);
-void inserir_no_inicio_pchar(lista_encadeada *l, char *x);
+void inserir_no_inicio_char_int(lista_encadeada *l, int x);
+void inserir_no_inicio_pchar(lista_encadeada *l, const char *x);
 void inserir_no_inicio_long(lista_encadeada *l, long x);
 void inserir_no_inicio_plong(lista_encadeada *l, long *x);
 void inserir_no_inicio_short(lista_encadeada *l, short x);
 void inserir_no_inicio_pshort(lista_encadeada *l, short *x);
-void inserir_no_inicio_pvoid(lista_encadeada *l, void *x);
+void inserir_no_inicio_pvoid(lista_encadeada *l, const void *x);
 
 void imprimir_lista(lista_encadeada *l);
 void remover_do_fim(lista_encadeada *l);
-void nao_suportado(lista_encadeada *l, void *x);
+void remover_do_inicio(lista_encadeada *l);
+void nao_suportado(lista_encadeada *l, const void *x);
 
 #endif /* __LISTA_ENCADEADA_H */
+

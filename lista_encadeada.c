@@ -70,7 +70,27 @@ lista_encadeada *nova_lista() {
     return l;
 }
 
+void limpar_lista(lista_encadeada *l) {
+    if (!l) return;
+    celula *c = l->primeiro;
+    while (c) {
+        celula *prox = c->proximo;
+        free(c);
+        c = prox;
+    }
+    l->primeiro = NULL;
+    l->ultimo = NULL;
+    l->tamanho = 0;
+}
+
+void destruir_lista(lista_encadeada *l) {
+    if (!l) return;
+    limpar_lista(l);
+    free(l);
+}
+
 void imprimir_lista(lista_encadeada *l) {
+    if (!l) return;
 
     celula *c = l->primeiro;
 
@@ -80,37 +100,40 @@ void imprimir_lista(lista_encadeada *l) {
                 printf("%d\n", c->valor_INT);
                 break;
             case PINT:
-                printf("%p\n", c->valor_PINT);
+                printf("%p\n", (void*)c->valor_PINT);
                 break;
             case LONG:
                 printf("%ld\n", c->valor_LONG);
                 break;
             case PLONG:
-                printf("%p\n", c->valor_PLONG);
+                printf("%p\n", (void*)c->valor_PLONG);
                 break;
              case SHORT:
                 printf("%d\n", c->valor_SHORT);
                 break;
             case PSHORT:
-                printf("%p\n", c->valor_PSHORT);
+                printf("%p\n", (void*)c->valor_PSHORT);
                 break;
             case FLOAT:
                 printf("%f\n", c->valor_FLOAT);
                 break;
             case PFLOAT:
-                printf("%p\n", c->valor_PFLOAT);
+                printf("%p\n", (void*)c->valor_PFLOAT);
                 break;
             case DOUBLE:
                 printf("%lf\n", c->valor_DOUBLE);
                 break;
             case PDOUBLE:
-                printf("%p\n", c->valor_PDOUBLE);
+                printf("%p\n", (void*)c->valor_PDOUBLE);
                 break;
             case CHAR:
                 printf("%c\n", c->valor_CHAR);
                 break;
             case PCHAR:
-                printf("%s\n", c->valor_PCHAR);
+                if (c->valor_PCHAR)
+                    printf("%s\n", c->valor_PCHAR);
+                else
+                    printf("(null)\n");
                 break;
             case PVOID:
                 printf("%p\n", c->valor_PVOID);
@@ -120,11 +143,8 @@ void imprimir_lista(lista_encadeada *l) {
     }
 }
 
-
-
 void remover_do_fim(lista_encadeada *l) {
-
-    if(l->tamanho == 0)
+    if(!l || l->tamanho == 0)
         return;
 
     celula *r = l->ultimo;
@@ -139,7 +159,24 @@ void remover_do_fim(lista_encadeada *l) {
 
     if(l->tamanho == 0)
         l->primeiro = NULL;
+}
 
+void remover_do_inicio(lista_encadeada *l) {
+    if(!l || l->tamanho == 0)
+        return;
+
+    celula *r = l->primeiro;
+    l->primeiro = l->primeiro->proximo;
+
+    if(l->primeiro != NULL)
+        l->primeiro->anterior = NULL;
+
+    free(r);
+
+    l->tamanho--;
+
+    if(l->tamanho == 0)
+        l->ultimo = NULL;
 }
 
 void inserir_no_fim_int(lista_encadeada *l, int x) {
@@ -166,8 +203,12 @@ void inserir_no_fim_char(lista_encadeada *l, char x) {
     COMMON_INSERT_END(l, x, CHAR);
 }
 
-void inserir_no_fim_pchar(lista_encadeada *l, char* x) {
-    COMMON_INSERT_END(l, x, PCHAR);
+void inserir_no_fim_char_int(lista_encadeada *l, int x) {
+    inserir_no_fim_char(l, (char)x);
+}
+
+void inserir_no_fim_pchar(lista_encadeada *l, const char* x) {
+    COMMON_INSERT_END(l, (char*)x, PCHAR);
 }
 void inserir_no_fim_long(lista_encadeada *l, long x) {
     COMMON_INSERT_END(l, x, LONG);
@@ -181,8 +222,8 @@ void inserir_no_fim_short(lista_encadeada *l, short x) {
 void inserir_no_fim_pshort(lista_encadeada *l, short * x) {
     COMMON_INSERT_END(l, x, PSHORT);
 }
-void inserir_no_fim_pvoid(lista_encadeada *l, void* x) {
-    COMMON_INSERT_END(l, x, PVOID);
+void inserir_no_fim_pvoid(lista_encadeada *l, const void* x) {
+    COMMON_INSERT_END(l, (void*)x, PVOID);
 }
 
 
@@ -210,8 +251,12 @@ void inserir_no_inicio_char(lista_encadeada *l, char x) {
     COMMON_INSERT_BEGIN(l, x, CHAR);
 }
 
-void inserir_no_inicio_pchar(lista_encadeada *l, char* x) {
-    COMMON_INSERT_BEGIN(l, x, PCHAR);
+void inserir_no_inicio_char_int(lista_encadeada *l, int x) {
+    inserir_no_inicio_char(l, (char)x);
+}
+
+void inserir_no_inicio_pchar(lista_encadeada *l, const char* x) {
+    COMMON_INSERT_BEGIN(l, (char*)x, PCHAR);
 }
 void inserir_no_inicio_long(lista_encadeada *l, long x) {
     COMMON_INSERT_BEGIN(l, x, LONG);
@@ -225,12 +270,13 @@ void inserir_no_inicio_short(lista_encadeada *l, short x) {
 void inserir_no_inicio_pshort(lista_encadeada *l, short * x) {
     COMMON_INSERT_BEGIN(l, x, PSHORT);
 }
-void inserir_no_inicio_pvoid(lista_encadeada *l, void* x) {
-    COMMON_INSERT_BEGIN(l, x, PVOID);
+void inserir_no_inicio_pvoid(lista_encadeada *l, const void* x) {
+    COMMON_INSERT_BEGIN(l, (void*)x, PVOID);
 }
 
-void nao_suportado(lista_encadeada *l, void *x) {
+void nao_suportado(lista_encadeada *l, const void *x) {
     (void)l;
     (void)x;
     fprintf(stderr, "Tipo nao suportado!\n");
 }
+

@@ -21,6 +21,6 @@ int main() {
         imprimir_lista(l);
     }
 
-    free(l);
-
+    destruir_lista(l);
+    return 0;
 }
